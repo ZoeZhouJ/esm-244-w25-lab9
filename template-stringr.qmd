@@ -1,5 +1,14 @@
 ---
-title: "Template
+title: Text Lab
+author: Zoe Zhou
+format: 
+  html:
+    embed-resources: true
+    code-fold: show
+    toc: true
+execute:
+  warning: false
+  message: false
 ---
 
 ```{r setup}
@@ -40,10 +49,20 @@ It can also be useful to update the *case* of strings in your code. Since, for e
 
 Apply each function individually to the `vec` object. Describe what each function does.
 
+```{r}
+print(vec)
+# convert to lowercase
+str_to_lower(vec)
+# convert to uppercase
+str_to_upper(vec)
+# convert string to title capitalize
+str_to_title(vec)
+# trim blank spcae before and after text
+str_trim(vec)
+# compact space
+str_squish(vec)
 
-
-
-
+```
 
 ### Detect a pattern
 
@@ -52,8 +71,13 @@ Use `stringr::str_detect()` to detect a string pattern. For example, if I want t
 
 ```{r}
 # detect a string pattern: 
-str_detect(vec, pattern = "corn")
+#str_detect(vec, pattern = "corn")
 
+#vec %>% 
+#  str_to_lower() %>% 
+#  str_detect(vec, pattern = "corn")
+
+str_detect(str_to_lower(vec), pattern = "corn")
 ```
 
 We see that it returns a T/F vector indicating whether or not the pattern "corn" exists within each element of the vector.
@@ -65,7 +89,8 @@ How might we use that in a data frame? It can be helpful to use `str_detect()` w
 Now use `filter()` and `str_detect()` to filter only characters whose name is Skywalker from the `starwars` dataset. Using "walk" as your pattern.
 
 ```{r}
-
+walk_subset <- starwars %>% 
+  filter(str_detect(name, pattern = "walk"))
 ```
 
 
@@ -85,9 +110,11 @@ Here's a more complicated regex. This time, we're filtering out characters whose
 
 ### Regex example: two or more cap letters!
 cap_subset <- starwars |> 
-  filter(str_detect(name, pattern = '[A-Z]{2,}')) 
+  filter(str_detect(name, pattern = '[A-Z]{2,}'))  #has capitalize letter in their name 
   ### NOTE: NO SPACE AFTER COMMA
   ### Regex is powerful but complicated, like the force!
+# two caps back to back
+
 ```
 
 ### Replace a pattern
@@ -102,16 +129,22 @@ str_replace_all(vec, pattern = "a", replacement = "ZZZ")
 In the `starwars` data, let's replace any "Sky" string pattern with "CIELO", overwriting the existing `name` column.
 
 ```{r}
-
+cw_cielo <- starwars %>% 
+  mutate(name = str_replace_all(name, pattern = "Sky", replacement = "CIELO"))
+cw_cielo
 ```
-
-
 
 And we can use these things in combination, usually within `mutate()` if it's to update a column in a data frame.
 
 Use your data wrangling skills to turn all names in the `starwars` data to lower case. Then filter out all the Sith with "Darth" titles in their names. Finally, bring balance to the force and change their names to "happy".
 
 ```{r}
+happy_darth <- starwars %>% 
+  mutate(name = str_to_lower(name)) %>% 
+  filter(str_detect(name, pattern = 'darth')) %>% 
+  mutate(name = str_replace(name, pattern = "darth", replacement = 'happy'))
+
+happy_darth
 
 ```
 
@@ -123,6 +156,7 @@ Here's another example with regex. Best way to interpret the cat walking is look
 sw_wawa <- starwars |> 
   mutate(name2 = str_replace(name, pattern = '(w|W)b?a.+', replacement = 'WAWA')) |> 
   select(name, name2)
+sw_wawa
 ```
 
 
@@ -134,6 +168,7 @@ sw_wawa <- starwars |>
 sw_firstnames <- starwars |> 
   mutate(firstname = str_extract(name, '[A-Za-z0-9]+')) |>  ### EXCLUDES spaces and punctuation
   select(name, firstname)
+sw_firstnames
 ```
 
 `str_locate` to identify positions of matches (regex or otherwise) - trickier to use in a dataframe but possible!
@@ -142,6 +177,7 @@ sw_firstnames <- starwars |>
 sw_where_sky <- starwars$name |> 
   str_to_lower() |> 
   str_locate('sky')
+sw_where_sky
 ```
 
 `str_sub` to extract characters by position in a string
@@ -150,4 +186,6 @@ sw_where_sky <- starwars$name |>
 sw_abbr <- starwars |> 
   select(name, homeworld) |> 
   mutate(homeworld_abbr = str_sub(homeworld, start = 1, end = 3))
+
+sw_abbr
 ```
